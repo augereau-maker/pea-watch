@@ -20,6 +20,7 @@ import html
 import json
 import math
 import os
+import re
 import smtplib
 import sys
 from email.mime.text import MIMEText
@@ -40,6 +41,20 @@ def closes(ticker, period):
         raise RuntimeError(f"Pas de données Yahoo pour {ticker}")
     s.index = s.index.tz_convert(PARIS).date
     return s
+
+
+def parse_positions(text):
+    """JSON {"DCAM.PA": 120} ou forme libre "DCAM.PA=120, CL2.PA=15" / "DCAM.PA: 120"."""
+    text = text.strip()
+    if not text:
+        return {}
+    try:
+        return {k.upper(): float(v) for k, v in json.loads(text).items()}
+    except (ValueError, AttributeError):
+        pairs = re.findall(r"([A-Za-z0-9]+\.[A-Za-z]+)\W*?[:=]\s*(\d+(?:[.,]\d+)?)", text)
+        if not pairs:
+            raise RuntimeError("PEA_POSITIONS illisible ; format attendu : DCAM.PA=120, CL2.PA=15")
+        return {k.upper(): float(v.replace(",", ".")) for k, v in pairs}
 
 
 def dip_multiplier(dd, levels):
@@ -114,7 +129,7 @@ def analyse(cfg, today, force_monthly=False):
     prev_bday = today - dt.timedelta(days=3 if today.weekday() == 0 else 1)
     fresh = sig.index[-1] >= prev_bday
 
-    positions = json.loads(os.environ["PEA_POSITIONS"]) if os.environ.get("PEA_POSITIONS") else {}
+    positions = parse_positions(os.environ.get("PEA_POSITIONS", ""))
     assets = []
     for a in cfg["assets"]:
         s = closes(a["ticker"], "1mo")
