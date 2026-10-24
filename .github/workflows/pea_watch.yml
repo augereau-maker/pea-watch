@@ -3,7 +3,12 @@ name: PEA Watch
 on:
   schedule:
     - cron: "0 14 * * 1-5"   # 14h UTC = 15h (hiver) / 16h (été) à Paris, jours ouvrés
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      test_mail:
+        description: "Envoyer seulement un mail de test"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -21,6 +26,12 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - if: ${{ inputs.test_mail }}
+        run: python pea_watch.py --test-mail
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
       - run: python pea_watch.py --out site/index.html
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
