@@ -1,0 +1,23 @@
+{
+  "monthly_contribution": 500,
+  "contribution_day": 5,
+  "cash_in_pea": 0,
+
+  "signal_ticker": "CW8.PA",
+  "signal_name": "MSCI World en EUR (Amundi CW8)",
+
+  "assets": [
+    {"ticker": "DCAM.PA", "name": "Amundi PEA Monde (MSCI World)", "target": 0.80, "qty": 0},
+    {"ticker": "CL2.PA",  "name": "Amundi MSCI USA levier x2 (CL2)", "target": 0.20, "qty": 0}
+  ],
+
+  "band": 0.05,
+
+  "dip_levels": [
+    {"drawdown": -0.10, "multiplier": 2},
+    {"drawdown": -0.20, "multiplier": 3},
+    {"drawdown": -0.30, "multiplier": 4}
+  ],
+
+  "limit_margin": 0.002
+}
